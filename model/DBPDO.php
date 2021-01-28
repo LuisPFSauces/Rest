@@ -7,37 +7,56 @@
  */
 class DBPDO {
 
-    public static function ejecutaConsulta($sentenciaSQL, $parametros) {
+    private static $miDB;
+    private static $transIniciada = 0;
+
+    public static function ejecutaConsulta($sentenciaSQL, $parametros, $transaccion = 0) {
         try {
-            $miDB = new PDO(DSN, USER, PASSWORD);
-            $miDB->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $consulta = $miDB->prepare($sentenciaSQL); //Preparamos la consulta.
-            $consulta->execute($parametros); //Ejecutamos la consulta.
+            if (is_null(self::$miDB)) {
+                self::$miDB = new PDO(DSN, USER, PASSWORD);
+                self::$miDB->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            }
+            if ($transaccion) {
+                self::transaccion();
+            }
+            $consulta = self::$miDB->prepare($sentenciaSQL); //Preparamos la consulta.
+            if (!$consulta->execute($parametros)) {
+                throw new Exception();
+            } //Ejecutamos la consulta.
         } catch (PDOException $exception) {
             $consulta = null; //Destruimos la consulta.
-            //echo $exception->getMessage();
+            echo $exception->getMessage();
         } finally {
-            unset($miDB);
+            if (!$transaccion) {
+                self::$miDB = null;
+            }
             return $consulta;
         }
     }
 
     //La contraseña se pasará ya 
-    public static function usuarioExiste($usuario, $contrasena) {
-        try {
-            $miDB = new PDO(DSN, USER, PASSWORD);
-            $miDB->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $consulta = $miDB->prepare("Select * from Usuario where CodUsuario= ? and Password=?");
-            $consulta->execute([$usuario, $contrasena]);
-            if ($consulta  && $consulta ->rowCount() > 0) {
-                return 1;
-            } else {
-                return 0;
-            }
-        } catch (Exception $e) {
-            return 0;
-        } finally {
-            unset($miDB);
+    public static function transaccion($estado = 1) {
+        switch ($estado) {
+            case 0:
+                if (!is_null(self::$miDB) && self::$transIniciada) {
+                    self::$miDB->commit();
+                    self::$transIniciada = 0;
+                    self::$miDB = null;
+                }
+                break;
+            case 1:
+                if (!self::$transIniciada) {
+                    self::$miDB->beginTransaction();
+                    self::$transIniciada = 1;
+                }
+                break;
+            case 2:
+                if (!is_null(self::$miDB) && self::$transIniciada) {
+                    self::$miDB->rollBack();
+                    self::$transIniciada = 0;
+                    self::$miDB = null;
+                }
+                break;
         }
     }
 
