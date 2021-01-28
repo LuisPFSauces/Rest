@@ -91,7 +91,6 @@ class UsuarioPDO {
     }
 
     public static function actualizar($argumentos) {
-        echo '';
         if (array_key_exists("ID", $argumentos)) {
             echo self::actualizarStatement($argumentos);
         } else {
@@ -102,11 +101,15 @@ class UsuarioPDO {
     public static function actualizarVarios($argumentos) {
         foreach ($argumentos as $valor) {
             if (array_key_exists("ID", $valor)) {
-                echo self::actualizarStatement($argumentos);
+                echo self::actualizarStatement($valor);
             } else {
                 return null;
             }
         }
+    }
+    
+    public static function borrar() {
+        
     }
 
 }

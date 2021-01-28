@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS DAW204DB_API_REST.Persona(
     Nombre VARCHAR(25),
     Descripcion VARCHAR(50),
     Edad INT
-)ENGINE=INNODB
+)ENGINE=INNODB;
 
 -- CREACION USUARIO ADMINISTRADOR
 -- Creacion de usuario administrador de la base de datos: usuarioDAW215DBDepartamentos / paso
