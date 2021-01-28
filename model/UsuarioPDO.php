@@ -74,10 +74,38 @@ class UsuarioPDO {
         }
     }
 
-    public static function actualizar($argumentos, $id) {
+    private static function actualizarStatement($argumentos) {
+        var_dump($argumentos);
         $statement = "Update Persona set ";
-        if (array_key_exists("limite", $argumentos)) {
-            
+        $id = $argumentos["ID"];
+        unset($argumentos["ID"]);
+        foreach (array_keys($argumentos) as $llave) {
+            $statement .= " $llave=:$llave";
+            if (array_key_last($argumentos) != $llave) {
+                $statement .= ",";
+            }
+        }
+        $statement .= " where ID=:id";
+        $argumentos['ID'] = $id;
+        return $statement;
+    }
+
+    public static function actualizar($argumentos) {
+        echo '';
+        if (array_key_exists("ID", $argumentos)) {
+            echo self::actualizarStatement($argumentos);
+        } else {
+            return null;
+        }
+    }
+
+    public static function actualizarVarios($argumentos) {
+        foreach ($argumentos as $valor) {
+            if (array_key_exists("ID", $valor)) {
+                echo self::actualizarStatement($argumentos);
+            } else {
+                return null;
+            }
         }
     }
 

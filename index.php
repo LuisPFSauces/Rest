@@ -3,18 +3,29 @@
 /**
  * 
  */
+require_once 'config/config.php';
+require_once 'config/confDBPDO.php';
+
+$aArgumentos = json_decode(file_get_contents("php://input"), true);
 switch ($_SERVER['REQUEST_METHOD']) {
     case "GET":
         echo "GET";
-        echo json_decode(file_get_contents("php://input"));
+        var_dump($aArgumentos);
         break;
     case "POST":
         echo "POST";
-        var_dump(json_decode(file_get_contents("php://input"), true));
+        var_dump($aArgumentos);
+        
         break;
     case "PUT":
-        echo "PUT";
-        echo json_decode(file_get_contents("php://input"));
+        echo "PUT s";
+        if (isset($aArgumentos[0]) && is_array($aArgumentos[0]) ){
+              UsuarioPDO::actualizarVarios($aArgumentos);
+        } else if(is_array($aArgumentos)) {
+            UsuarioPDO::actualizar($aArgumentos);
+        } else {
+            http_response_code(422);
+        }
         break;
     case "DELETE":
         echo "DELETE";
